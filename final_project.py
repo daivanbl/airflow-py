@@ -80,6 +80,9 @@ def insertData():
     with open(path+"/loadtodb.txt", 'r') as f:
      global datetimex
     # print(f.read())
+     sql_stmt = "DELETE FROM service_monitoring"
+     cursor.execute(sql_stmt)
+     pg_conn.commit()
      for line in f.readlines():
          value = line.split('|')
          params = (value[1], value[2], value[3], value[4], value[5], value[6], value[7].replace('\n', ''))
@@ -103,8 +106,8 @@ def insertData():
 #     cursor.close()
 #     pg_conn.close()
 
-def get_data(date):
-    sql_stmt = "select service, sum(trx), sum(error) from service_monitoring where datetimex = '"+date+"' and error > 0 group by service"
+def get_data():
+    sql_stmt = "select service, sum(trx), sum(error) from service_monitoring where error > 0 group by service"
     # sql_stmt = "select service, sum(trx), sum(error) from service_monitoring where datetimex = '2023-05-09 04:12:00' group by service"
     print(sql_stmt)
     cursor.execute(sql_stmt)
@@ -121,8 +124,9 @@ def generate_and_send_email():
     message["From"] = sender_email
     message["To"] = receiver_email
     # write the plain text part
+    print(datetimex)
 
-    results = get_data(datetimex)
+    results = get_data()
 
     if(len(results) == 0):
         print('NO ERRORS')
